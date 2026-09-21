@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sudoku — Minimal & Interactive Solver</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Bar / Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">Sudoku</h1>
+          <p class="brand-subtitle">Powered by Java Backtracking Algorithm</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Preset Dropdown -->
+        <div class="select-wrapper">
+          <select id="presetSelect" class="dropdown" aria-label="Select Puzzle">
+            <option value="java-default">Sudoku.java Preset</option>
+            <option value="easy">Easy Puzzle</option>
+            <option value="medium">Medium Puzzle</option>
+            <option value="hard">Hard Puzzle</option>
+            <option value="blank">Blank Board (Custom)</option>
+          </select>
+        </div>
+
+        <!-- Code Viewer Toggle -->
+        <button id="toggleCodeBtn" class="btn btn-secondary icon-btn" title="View Java Source Code">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+          <span class="btn-text">Code</span>
+        </button>
+
+        <!-- Dark/Light Theme Toggle -->
+        <button id="themeToggleBtn" class="btn btn-secondary icon-btn" title="Toggle Theme" aria-label="Toggle Theme">
+          <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="moon-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-layout">
+      <!-- Left / Center Column: Sudoku Grid & Visualizer Status -->
+      <section class="board-section">
+        <!-- Status Notification Banner -->
+        <div id="statusBanner" class="status-banner">
+          <span id="statusDot" class="status-dot"></span>
+          <span id="statusText">Ready — Select a cell or use solver controls</span>
+        </div>
+
+        <!-- 9x9 Grid Container -->
+        <div class="grid-card">
+          <div id="sudokuGrid" class="sudoku-grid" tabindex="0" role="grid" aria-label="Sudoku Board">
+            <!-- 81 Cells generated dynamically via JavaScript -->
+          </div>
+        </div>
+
+        <!-- Visualizer Progress & Speed (shown during animation) -->
+        <div id="visualizerControls" class="visualizer-bar hidden">
+          <div class="vis-info">
+            <span class="vis-stat">Steps: <b id="stepCounter">0</b></span>
+            <span class="vis-stat">Backtracks: <b id="backtrackCounter">0</b></span>
+          </div>
+          <div class="vis-speed">
+            <label for="speedRange">Speed:</label>
+            <input type="range" id="speedRange" min="1" max="60" value="30">
+          </div>
+          <div class="vis-actions">
+            <button id="pauseVisBtn" class="btn btn-sm btn-secondary">Pause</button>
+            <button id="stopVisBtn" class="btn btn-sm btn-danger">Stop</button>
+          </div>
+        </div>
+
+        <!-- Primary Actions Bar -->
+        <div class="action-buttons">
+          <button id="solveInstantBtn" class="btn btn-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            Solve Instantly
+          </button>
+
+          <button id="visualizeBtn" class="btn btn-accent">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polygon points="10 8 16 12 10 16 10 8" fill="currentColor"></polygon>
+            </svg>
+            Visualize Algorithm
+          </button>
+
+          <button id="resetBoardBtn" class="btn btn-secondary" title="Reset puzzle to initial state">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+              <path d="M3 3v5h5"></path>
+            </svg>
+            Reset
+          </button>
+
+          <button id="clearBoardBtn" class="btn btn-ghost" title="Clear all cells">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            Clear
+          </button>
+        </div>
+      </section>
+
+      <!-- Right Column: Keypad & Information -->
+      <aside class="side-panel">
+        <!-- Interactive Keypad -->
+        <div class="panel-card keypad-card">
+          <div class="card-header">
+            <h3>Input Number</h3>
+            <span class="badge">Or keyboard 1-9</span>
+          </div>
+          <div class="keypad-grid">
+            <button class="key-btn" data-key="1">1</button>
+            <button class="key-btn" data-key="2">2</button>
+            <button class="key-btn" data-key="3">3</button>
+            <button class="key-btn" data-key="4">4</button>
+            <button class="key-btn" data-key="5">5</button>
+            <button class="key-btn" data-key="6">6</button>
+            <button class="key-btn" data-key="7">7</button>
+            <button class="key-btn" data-key="8">8</button>
+            <button class="key-btn" data-key="9">9</button>
+            <button class="key-btn key-erase" data-key="0" title="Clear Cell (Backspace)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path>
+                <line x1="18" y1="9" x2="12" y2="15"></line>
+                <line x1="12" y1="9" x2="18" y2="15"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Algorithm Insights Card -->
+        <div class="panel-card info-card">
+          <div class="card-header">
+            <h3>Algorithm Logic</h3>
+            <span class="badge badge-accent">Sudoku.java</span>
+          </div>
+          <p class="info-desc">
+            Uses recursive depth-first search with backtracking. For each empty cell:
+          </p>
+          <ul class="steps-list">
+            <li>
+              <span class="step-num">1</span>
+              <div><b>Check safety:</b> Tests if digit 1–9 is valid in the current row, column, and 3×3 subgrid using <code>isSafe()</code>.</div>
+            </li>
+            <li>
+              <span class="step-num">2</span>
+              <div><b>Recurse:</b> Places candidate digit and recursively attempts to solve the remaining board.</div>
+            </li>
+            <li>
+              <span class="step-num">3</span>
+              <div><b>Backtrack:</b> If no valid digit completes the board, resets cell to <code>0</code> and rolls back.</div>
+            </li>
+          </ul>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Slide-in / Modal Java Code Inspector -->
+    <div id="codeModal" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title">
+            <span class="lang-tag">Java</span>
+            <h3>PROJECT / Sudoku.java</h3>
+          </div>
+          <button id="closeCodeBtn" class="close-btn" aria-label="Close modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <pre class="code-viewer"><code><span class="cm">// Sudoku Solver from D:\yash\JAVA\PROJECT\Sudoku.java</span>
+<span class="kd">public class</span> <span class="nc">Sudoku</span> {
+
+    <span class="kd">public static boolean</span> <span class="nf">isSafe</span>(<span class="kd">int</span> Sudoku[][] , <span class="kd">int</span> row , <span class="kd">int</span> col , <span class="kd">int</span> digit){
+        <span class="cm">// column check</span>
+        <span class="k">for</span>(<span class="kd">int</span> i = <span class="mi">0</span> ; i&lt;=<span class="mi">8</span> ; i++){
+            <span class="k">if</span>(Sudoku[i][col] == digit) <span class="k">return false</span>;
+        }
+
+        <span class="cm">// row check</span>
+        <span class="k">for</span>(<span class="kd">int</span> j = <span class="mi">0</span>; j&lt;=<span class="mi">8</span>; j++){
+            <span class="k">if</span>(Sudoku[row][j] == digit) <span class="k">return false</span>;
+        }
+
+        <span class="cm">// 3x3 grid check</span>
+        <span class="kd">int</span> sr = (row/<span class="mi">3</span>) * <span class="mi">3</span>;
+        <span class="kd">int</span> sc = (col/<span class="mi">3</span>) * <span class="mi">3</span>;
+        <span class="k">for</span>(<span class="kd">int</span> i = sr ; i &lt; sr+<span class="mi">3</span> ; i++){
+            <span class="k">for</span>(<span class="kd">int</span> j = sc ; j &lt; sc+<span class="mi">3</span> ; j++){
+                <span class="k">if</span>(Sudoku[i][j] == digit) <span class="k">return false</span>;
+            }
+        }
+        <span class="k">return true</span>;
+    }
+
+    <span class="kd">public static boolean</span> <span class="nf">SudokuSolver</span>(<span class="kd">int</span> Sudoku[][] , <span class="kd">int</span> row , <span class="kd">int</span> col){
+        <span class="cm">// base case: reached beyond the final row</span>
+        <span class="k">if</span>(row == <span class="mi">9</span> &amp;&amp; col == <span class="mi">0</span>) <span class="k">return true</span>;
+    
+        <span class="kd">int</span> nextRow = row, nextCol = col + <span class="mi">1</span>;  
+        <span class="k">if</span>(col + <span class="mi">1</span> == <span class="mi">9</span>){
+            nextRow = row + <span class="mi">1</span>; 
+            nextCol = <span class="mi">0</span>;
+        }
+
+        <span class="k">if</span>(Sudoku[row][col] != <span class="mi">0</span>){
+            <span class="k">return</span> SudokuSolver(Sudoku, nextRow, nextCol);
+        }
+
+        <span class="k">for</span>(<span class="kd">int</span> digit = <span class="mi">1</span> ; digit &lt;= <span class="mi">9</span> ; digit++){
+            <span class="k">if</span>(isSafe(Sudoku, row, col, digit)){
+                Sudoku[row][col] = digit;
+                <span class="k">if</span>(SudokuSolver(Sudoku, nextRow, nextCol)) <span class="k">return true</span>;
+                Sudoku[row][col] = <span class="mi">0</span>; <span class="cm">// backtrack</span>
+            }
+        }
+        <span class="k">return false</span>;
+    }
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Minimal Toast Notification -->
+    <div id="toast" class="toast hidden"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
