@@ -1,0 +1,11 @@
+# Ensure GitHub Linguist reports this repository as 100% Java
+*.java linguist-detectable=true
+
+*.js linguist-vendored=true
+*.js linguist-detectable=false
+
+*.css linguist-vendored=true
+*.css linguist-detectable=false
+
+*.html linguist-vendored=true
+*.html linguist-detectable=false

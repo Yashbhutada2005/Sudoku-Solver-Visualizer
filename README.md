@@ -1,35 +1,99 @@
-# Sudoku Solver & Algorithm Visualizer
+# Sudoku Solver & Algorithm Visualizer (Pure Java)
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Language-JavaScript%20%7C%20Java-f59e0b?style=for-the-badge&logo=javascript" alt="Language" />
+  <img src="https://img.shields.io/badge/Language-100%25%20Java-orange?style=for-the-badge&logo=openjdk" alt="Language" />
+  <img src="https://img.shields.io/badge/Java%20Version-8%20%2F%2011%20%2F%2017%20%2F%2021%20%2F%2025-blue?style=for-the-badge&logo=java" alt="Java Version" />
   <img src="https://img.shields.io/badge/Architecture-DFS%20Backtracking-6366f1?style=for-the-badge" alt="Algorithm" />
-  <img src="https://img.shields.io/badge/UI-Minimalist%20%26%20Responsive-10b981?style=for-the-badge" alt="UI" />
+  <img src="https://img.shields.io/badge/Zero%20Dependencies-Standard%20JDK%20Only-success?style=for-the-badge" alt="Zero Dependencies" />
   <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="License" />
 </p>
 
-A minimal, attractive web-based **Sudoku Solver & Interactive Algorithm Visualizer** alongside its native **Java** reference implementation. Built using depth-first search (DFS) with recursive backtracking, this project allows you to solve standard 9×9 puzzles in milliseconds, step through the recursion tree in real time, or play puzzles with interactive constraint checking.
+A pure **Java**-powered **Sudoku Solver & Algorithm Visualizer** featuring:
+1. **Core Java Solver (`Sudoku.java`)**: Depth-first recursive backtracking algorithm.
+2. **Built-in Java Web Server (`SudokuServer.java`)**: Serves the modern, minimal web UI and handles solving/validation API requests directly on the JVM.
+3. **Pure Java Desktop Application (`SudokuApp.java`)**: Clean, minimalist Swing desktop GUI.
+4. **Minimalist Web Client**: An interactive visualizer with dark/light modes and visual step-by-step backtracking.
 
 ---
 
-## Key Features
+## Architecture Overview
 
-- **Blazing Fast Solver**: Solves valid 9×9 puzzles in under 15ms using recursive backtracking.
-- **Interactive Visualizer**: Step-by-step visual animation demonstrating state exploration, candidate placement, and rollback/backtracking in real time.
-- **Dual Solver Engines**:
-  - **Web Client**: Zero-dependency, pure vanilla HTML5, CSS3, and ES6 JavaScript.
-  - **Java CLI**: Reference command-line solver (`Sudoku.java`).
-- **Minimalist Aesthetic**:
-  - Dark & Light themes with persistent preferences.
-  - Crosshair highlighting (active row, column, and 3×3 subgrid).
-  - Matching number highlights to spot duplicate patterns instantly.
-  - Smooth micro-animations and conflict indicators.
-- **Interactive Gameplay**:
-  - Play using physical keyboard (1–9, arrows, Backspace/Delete) or on-screen virtual keypad.
-  - Instant conflict detection warning when violating Sudoku rules (`isSafe`).
-- **Puzzle Presets**:
-  - Built-in library: *Sudoku.java Benchmark*, *Easy*, *Medium*, *Hard*, and *Blank Board* for custom inputs.
-- **Embedded Code Viewer**:
-  - Review the exact Java implementation (`isSafe` & `SudokuSolver`) directly in the web UI.
+```text
++-------------------------------------------------------------------------+
+|                        Java 25 Runtime (HotSpot JVM)                    |
+|                                                                         |
+|   +-----------------------------------------------------------------+   |
+|   |                        Sudoku.java                              |   |
+|   |   - isSafe(grid, row, col, digit): Row, Col & 3x3 Box Checks   |   |
+|   |   - SudokuSolver(grid, row, col): DFS Recursive Backtracking   |   |
+|   +-----------------------------------------------------------------+   |
+|                 ^                                     ^                 |
+|                 |                                     |                 |
+|   +---------------------------+         +---------------------------+   |
+|   |     SudokuServer.java     |         |      SudokuApp.java       |   |
+|   |   - Built-in HTTP Server  |         |   - Modern Java Swing UI  |   |
+|   |   - REST API: /api/solve  |         |   - 9x9 Interactive Grid  |   |
+|   |   - REST API: /api/valid  |         |   - Native Desktop Window |   |
+|   |   - Serves Web Frontend   |         +---------------------------+   |
+|   +---------------------------+                                         |
++-----------------|-------------------------------------------------------+
+                  | HTTP / JSON (Port 8080)
+                  v
++-------------------------------------------------------------------------+
+|                      Minimal Web Client Interface                       |
+|   - index.html, style.css, app.js (Visualizer & Interactive Player)     |
++-------------------------------------------------------------------------+
+```
+
+---
+
+## How to Run
+
+Zero external libraries or build tools required. Works directly with `javac` and `java`.
+
+### Option 1: Run Java Web Server (Recommended)
+Compiles and starts the built-in Java web server, automatically launching the web interface in your browser:
+
+```bash
+# Compile all Java files
+javac *.java
+
+# Start Java Web Server
+java SudokuServer
+```
+*Your browser will automatically open `http://localhost:8080` with the solver powered directly by Java!*
+
+---
+
+### Option 2: Run Pure Java Desktop GUI
+Launches the native Java Swing desktop application:
+
+```bash
+java SudokuApp
+```
+
+---
+
+### Option 3: Run Java Console / Terminal Solver
+Runs the classic command-line benchmark:
+
+```bash
+java Sudoku
+```
+
+---
+
+## Features
+
+- **100% Java Engine**: Backtracking solver and constraint propagation implemented entirely in Java.
+- **Dual Presentation Layers**:
+  - **Modern Web Application**: Responsive, minimal UI with dark/light themes, crosshairs, and visual step-by-step backtracking.
+  - **Native Desktop GUI**: Standalone Java Swing application with instant solving and custom board input.
+- **RESTful Java API**:
+  - `POST /api/solve` — Computes solutions on the JVM and returns execution latency in milliseconds.
+  - `POST /api/validate` — Validates board constraints using `Sudoku.isSafe()`.
+  - `GET /api/health` — Checks server and JVM status.
+- **Algorithmic Transparency**: View the exact Java methods in the web code inspector or inspect the documented source files.
 
 ---
 
@@ -37,75 +101,42 @@ A minimal, attractive web-based **Sudoku Solver & Interactive Algorithm Visualiz
 
 ```text
 Sudoku-Solver-Visualizer/
-├── index.html         # Main web application entry point
-├── style.css          # Minimal design system, themes, and animations
-├── app.js             # Algorithm engine, visualizer scheduler & UI events
-├── Sudoku.java        # Core Java reference backtracking solver
+├── Sudoku.java        # Core Java recursive backtracking solver
+├── SudokuServer.java  # Pure Java built-in HTTP server & REST API
+├── SudokuApp.java     # Pure Java modern desktop GUI (Swing)
+├── index.html         # Minimal web interface
+├── style.css          # Minimal design system, dark/light themes
+├── app.js             # Visualizer engine & client API connector
 ├── SRS.md             # IEEE 830 Software Requirements Specification
-├── README.md          # Project documentation & overview
+├── README.md          # Project documentation
 ├── LICENSE            # MIT License
-└── .gitignore         # Build and IDE artifact exclusions
+├── .gitignore         # Build and IDE artifact exclusions
+└── .gitattributes     # Configures GitHub Linguist to 100% Java
 ```
 
 ---
 
 ## Algorithmic Formulation
 
-The solver models Sudoku as a **Constraint Satisfaction Problem (CSP)** solved via recursive backtracking:
+The solver formalizes Sudoku as a **Constraint Satisfaction Problem (CSP)**:
 
 1. **Validation (`isSafe`)**:
-   - Ensures candidate digit $d \in \{1, \dots, 9\}$ does not appear in the current row, column, or enclosing $3 \times 3$ subgrid.
+   - Ensures candidate digit $d \in \{1, \dots, 9\}$ does not violate row, column, or $3 \times 3$ subgrid uniqueness.
 2. **Recursive Search (`SudokuSolver`)**:
-   - Traverses cells left-to-right, row-by-row.
-   - Upon encountering an empty cell ($0$), iterates through candidates $1 \dots 9$.
-   - If candidate is safe, sets cell value and recurses to the next cell.
-   - If the recursive branch returns `false` (dead end), resets cell to $0$ (**backtracks**) and tries the next candidate.
+   - Depth-First Search with backtracking.
+   - Places a valid candidate and recurses to the next cell.
+   - If a dead end is encountered, resets the cell to $0$ and backtracks to explore alternative branches.
 
 ### Complexity
-- **Worst-Case Time Complexity**: $\mathcal{O}(9^M)$, where $M \le 81$ is the number of empty cells.
-- **Optimized Practical Complexity**: Early constraint pruning keeps actual operations typically under $10^5$.
-- **Space Complexity**: $\mathcal{O}(M)$ auxiliary space on the call stack.
-
----
-
-## Quick Start
-
-### 1. Web Application (Zero Installation)
-Simply double-click `index.html` or open it in any web browser (Chrome, Edge, Firefox, Safari):
-
-```bash
-# On Windows (PowerShell)
-start index.html
-```
-
-### 2. Java Terminal Application
-Compile and execute the standalone Java solver:
-
-```bash
-# Compile
-javac Sudoku.java
-
-# Run
-java Sudoku
-```
-
----
-
-## Keyboard Shortcuts
-
-| Key | Action |
-| :--- | :--- |
-| `1` – `9` | Place digit in selected cell |
-| `Backspace` / `Delete` / `0` | Clear digit from selected cell |
-| `↑` `↓` `←` `→` | Navigate grid cells with wrap-around |
-| `Escape` | Deselect current cell / Close modal |
+- **Worst-Case Time Complexity**: $\mathcal{O}(9^M)$, where $M \le 81$ is the number of unassigned cells.
+- **Optimized Practical Complexity**: Early constraint pruning evaluates standard puzzles in $< 10^5$ operations (sub-15ms).
+- **Space Complexity**: $\mathcal{O}(M)$ recursion depth on the JVM call stack.
 
 ---
 
 ## Documentation
 
-For full engineering specifications, architecture diagrams, data flow diagrams, and IEEE 830 compliance details, please refer to:
-- [Software Requirements Specification (SRS)](SRS.md)
+- [Software Requirements Specification (SRS - IEEE 830)](SRS.md)
 
 ---
 

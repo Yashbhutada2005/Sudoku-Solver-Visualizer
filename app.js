@@ -329,13 +329,34 @@ function checkBoardCompletion() {
 // Solve Actions
 // =============================================================================
 
-function handleSolveInstant() {
+async function handleSolveInstant() {
   if (isVisualizing) stopVisualization();
 
   if (!isBoardValid(currentGrid)) {
     setStatus('Cannot solve: Current board has rule conflicts', 'error');
     showToast('Rule conflict detected on board!');
     return;
+  }
+
+  // Call Java Web Server API if available
+  try {
+    const response = await fetch('/api/solve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ grid: currentGrid })
+    });
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success && data.solution) {
+        currentGrid = data.solution;
+        renderBoard();
+        setStatus(`Solved in ${data.timeMs}ms using Java HotSpot Backtracking Engine`, 'success');
+        showToast(`⚡ Solved in ${data.timeMs}ms via Java!`);
+        return;
+      }
+    }
+  } catch (err) {
+    // Java server not running or direct file access; proceed with direct client solver
   }
 
   const solverGrid = cloneGrid(currentGrid);
